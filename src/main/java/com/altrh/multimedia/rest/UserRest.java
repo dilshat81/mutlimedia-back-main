@@ -12,7 +12,7 @@ import java.util.Map;
 
 @RequestMapping(path="/user")
 public interface UserRest {
-    @PostMapping(path="signup")
+    @PostMapping(path="/signup")
     public ResponseEntity<String> signUp(@RequestBody(required = true) Map<String, String> requestMap);
 
     @PostMapping(path="/login")
@@ -32,6 +32,8 @@ public interface UserRest {
 
     @PostMapping(path="/forgotPassword")
     public ResponseEntity<String> forgotPassword(@RequestBody Map<String, String> requestMap);
+
+
 
 
 }

@@ -32,7 +32,7 @@ public class CategoryServiceImpl implements CategoryService {
             if(jwtFilter.isAdmin()){
                 if(validateCategoryMap(requestMap, false)){
                     categoryDao.save(getCategoryFormMap(requestMap, false));
-                    return MultimediaUtils.getResponseEntity("Category added successfully", HttpStatus.OK);
+                    return MultimediaUtils.getResponseEntity("Catégorie ajoutée avec succès", HttpStatus.OK);
                 }
             }else{
                 return MultimediaUtils.getResponseEntity(MultimediaConstants.UNAUTHORIZED_ACCES, HttpStatus.UNAUTHORIZED);
@@ -65,9 +65,9 @@ public class CategoryServiceImpl implements CategoryService {
                    Optional optional = categoryDao.findById(Integer.parseInt(requestMap.get("id")));
                    if(!optional.isEmpty()){
                         categoryDao.save(getCategoryFormMap(requestMap, true));
-                       return MultimediaUtils.getResponseEntity("Category  Updated Successfully", HttpStatus.OK);
+                       return MultimediaUtils.getResponseEntity("Catégorie mise à jour avec succès", HttpStatus.OK);
                    }else{
-                       return MultimediaUtils.getResponseEntity("Category id does not exist", HttpStatus.OK);
+                       return MultimediaUtils.getResponseEntity("Catégorie id n'existe pas", HttpStatus.OK);
                    }
                 }
                 return MultimediaUtils.getResponseEntity(MultimediaConstants.INVALID_DATA, HttpStatus.BAD_REQUEST);

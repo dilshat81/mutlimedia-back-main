@@ -30,7 +30,7 @@ public class ProductServiceImpl implements ProductService {
             if(jwtFilter.isAdmin()){
                 if(validateProductMap(requestMap, false)){
                     productDao.save(getProductForm(requestMap, false));
-                    return MultimediaUtils.getResponseEntity("Product added Successfully", HttpStatus.OK);
+                    return MultimediaUtils.getResponseEntity("Produit ajouté avec succès", HttpStatus.OK);
                 }
                 return MultimediaUtils.getResponseEntity(MultimediaConstants.INVALID_DATA, HttpStatus.BAD_REQUEST);
             }else{
@@ -94,9 +94,9 @@ public class ProductServiceImpl implements ProductService {
                       Product product = getProductForm(requestMap, true);
                       product.setStatus(optional.get().getStatus());
                       productDao.save(product);
-                      return MultimediaUtils.getResponseEntity("Product updated successfully", HttpStatus.OK);
+                      return MultimediaUtils.getResponseEntity("Produit mis à jour avec succès", HttpStatus.OK);
                   }else{
-                      return MultimediaUtils.getResponseEntity("Product id is does not exist", HttpStatus.OK);
+                      return MultimediaUtils.getResponseEntity("Produit id n'existe pas", HttpStatus.OK);
                   }
                 }else{
                     return MultimediaUtils.getResponseEntity(MultimediaConstants.INVALID_DATA, HttpStatus.BAD_REQUEST);
@@ -118,9 +118,9 @@ public class ProductServiceImpl implements ProductService {
                 Optional optional = productDao.findById(id);
                 if(!optional.isEmpty()){
                     productDao.deleteById(id);
-                    return MultimediaUtils.getResponseEntity("Product deleted Successfully", HttpStatus.OK);
+                    return MultimediaUtils.getResponseEntity("Produit supprimé avec succès", HttpStatus.OK);
                 }else{
-                    return  MultimediaUtils.getResponseEntity("Product id does not exist", HttpStatus.OK);
+                    return  MultimediaUtils.getResponseEntity("Produit id n'existe pas", HttpStatus.OK);
                 }
             }else{
                 return MultimediaUtils.getResponseEntity(MultimediaConstants.UNAUTHORIZED_ACCES, HttpStatus.UNAUTHORIZED);
@@ -138,9 +138,9 @@ public class ProductServiceImpl implements ProductService {
                 Optional optional = productDao.findById(Integer.parseInt(requestMap.get(("id"))));
                 if(!optional.isEmpty()){
                     productDao.updateProductStatus(requestMap.get("status"), Integer.parseInt(requestMap.get("id")));
-                    return MultimediaUtils.getResponseEntity("Product status updated successfully", HttpStatus.OK);
+                    return MultimediaUtils.getResponseEntity("Statut du produit mis à jour avec succès", HttpStatus.OK);
                 }else{
-                    return  MultimediaUtils.getResponseEntity("Product id does not exist", HttpStatus.OK);
+                    return  MultimediaUtils.getResponseEntity("Produit id n'existe pas", HttpStatus.OK);
                 }
             }else{
                 return MultimediaUtils.getResponseEntity(MultimediaConstants.UNAUTHORIZED_ACCES, HttpStatus.UNAUTHORIZED);

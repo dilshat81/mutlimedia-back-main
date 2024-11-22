@@ -20,8 +20,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.security.PermitAll;
 import java.util.*;
 
 @Slf4j
@@ -30,7 +32,8 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     UserDao userDao;
-
+    @Autowired
+    private PasswordEncoder encoder;
     @Autowired
     AuthenticationManager authenticationManager;
 
@@ -106,7 +109,7 @@ public class UserServiceImpl implements UserService {
         user.setName(requestMap.get("name"));
         user.setContactNumber(requestMap.get("contactNumber"));
         user.setEmail(requestMap.get("email"));
-        user.setPassword(requestMap.get("password"));
+        user.setPassword(encoder.encode(requestMap.get("password")));
         user.setStatus("false");
         user.setRole("user");
         return user;
@@ -137,7 +140,7 @@ public class UserServiceImpl implements UserService {
                     sendMailToAllAdmin(requestMap.get("status"), optional.get().getEmail(), userDao.getAllAdmin());
                     return MultimediaUtils.getResponseEntity("User updated successfully", HttpStatus.OK);
                }else{
-                   MultimediaUtils.getResponseEntity("User id doesn't exist", HttpStatus.OK);
+                   MultimediaUtils.getResponseEntity("l'utilisateur id n'existe pas", HttpStatus.OK);
                }
             }else{
                 return MultimediaUtils.getResponseEntity(MultimediaConstants.UNAUTHORIZED_ACCES, HttpStatus.UNAUTHORIZED);
@@ -172,9 +175,9 @@ public class UserServiceImpl implements UserService {
                 if(userObj.getPassword().equals(requestMap.get("oldPassword"))){
                     userObj.setPassword(requestMap.get("newPassword"));
                     userDao.save(userObj);
-                    return MultimediaUtils.getResponseEntity("Password updated successfully", HttpStatus.OK);
+                    return MultimediaUtils.getResponseEntity("Mot de passe mis à jour avec succès", HttpStatus.OK);
                 }else{
-                    return MultimediaUtils.getResponseEntity("Incorrect old password", HttpStatus.BAD_REQUEST);
+                    return MultimediaUtils.getResponseEntity("Ancien mot de passe incorrect", HttpStatus.BAD_REQUEST);
                 }
 
             }else{
@@ -191,10 +194,8 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<String> forgotPassword(Map<String, String> requestMap) {
         try {
             User user = userDao.findByEmail(requestMap.get("email"));
-
-                emailUtils.forgotMail(user.getEmail(), "Credential by multimedia management system", user.getPassword());
-                return MultimediaUtils.getResponseEntity("Check your mail for credentials", HttpStatus.OK);
-
+            if (!Objects.isNull(user) && !Strings.isNullOrEmpty(user.getEmail()))
+                return MultimediaUtils.getResponseEntity("Vérifiez votre courrier pour les informations d'identification", HttpStatus.OK);
 
         }catch(Exception ex){
             ex.printStackTrace();
@@ -202,6 +203,7 @@ public class UserServiceImpl implements UserService {
 
         return MultimediaUtils.getResponseEntity(MultimediaConstants.SOMTING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
 
 
 }
