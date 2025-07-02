@@ -57,7 +57,7 @@ public class BillServiceImpl implements BillService {
                document.open();
                setRectangleInPdf(document);
 
-                Paragraph chunk = new Paragraph("Magasin Multimédia", getFont("Header"));
+                Paragraph chunk = new Paragraph("Magasin Multimédia Geek Galaxy store", getFont("Header"));
                 chunk.setAlignment(Element.ALIGN_CENTER);
                 document.add(chunk);
 
@@ -90,7 +90,7 @@ public class BillServiceImpl implements BillService {
         }catch(Exception ex){
             ex.printStackTrace();
         }
-        return MultimediaUtils.getResponseEntity(MultimediaConstants.SOMTING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+        return MultimediaUtils.getResponseEntity(MultimediaConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     private void addRows(PdfPTable table, Map<String, Object> data) {
@@ -234,14 +234,14 @@ public class BillServiceImpl implements BillService {
             Optional optional = billDao.findById(id);
             if(!optional.isEmpty()) {
                 billDao.deleteById(id);
-                return MultimediaUtils.getResponseEntity("Bill deleted successfully", HttpStatus.OK);
+                return MultimediaUtils.getResponseEntity("Facture supprimée avec succès", HttpStatus.OK);
             }else {
-                return MultimediaUtils.getResponseEntity("Bill id does not exist", HttpStatus.OK);
+                return MultimediaUtils.getResponseEntity("Facture n'existe pas", HttpStatus.OK);
             }
         }catch(Exception ex){
             ex.printStackTrace();
         }
-        return MultimediaUtils.getResponseEntity(MultimediaConstants.SOMTING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+        return MultimediaUtils.getResponseEntity(MultimediaConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
 
     }
 }

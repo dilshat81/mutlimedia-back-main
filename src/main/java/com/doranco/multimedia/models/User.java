@@ -1,11 +1,15 @@
 package com.doranco.multimedia.models;
 
+import com.doranco.multimedia.utils.validation.ValidPassword;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
+
 @NamedQuery(name="User.findByEmailId", query = "select u from User u where u.email=:email")
 @NamedQuery(name="User.getAllUser", query = "select new com.doranco.multimedia.wrapper.UserWrapper(u.id,u.name,u.email, u.contactNumber,u.status) from User u where u.role='user'")
 @NamedQuery(name="User.updateStatus", query = "update User u set u.status=:status where u.id=:id")
@@ -17,6 +21,8 @@ import java.io.Serializable;
 @DynamicUpdate
 @DynamicInsert
 @Table(name="user")
+@NoArgsConstructor
+@AllArgsConstructor
 public class User implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
@@ -30,7 +36,6 @@ public class User implements Serializable {
     @Column(name="email")
     private String email;
 
-    @Column(name="password")
     private String password;
 
     @Column(name="status")

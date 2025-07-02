@@ -35,12 +35,12 @@ public class CategoryServiceImpl implements CategoryService {
                     return MultimediaUtils.getResponseEntity("Catégorie ajoutée avec succès", HttpStatus.OK);
                 }
             }else{
-                return MultimediaUtils.getResponseEntity(MultimediaConstants.UNAUTHORIZED_ACCES, HttpStatus.UNAUTHORIZED);
+                return MultimediaUtils.getResponseEntity(MultimediaConstants.UNAUTHORIZED_ACCESS, HttpStatus.UNAUTHORIZED);
             }
         }catch(Exception ex){
             ex.printStackTrace();
         }
-        return MultimediaUtils.getResponseEntity(MultimediaConstants.SOMTING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+        return MultimediaUtils.getResponseEntity(MultimediaConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Override
@@ -72,12 +72,12 @@ public class CategoryServiceImpl implements CategoryService {
                 }
                 return MultimediaUtils.getResponseEntity(MultimediaConstants.INVALID_DATA, HttpStatus.BAD_REQUEST);
             }else{
-                return MultimediaUtils.getResponseEntity(MultimediaConstants.UNAUTHORIZED_ACCES, HttpStatus.BAD_REQUEST);
+                return MultimediaUtils.getResponseEntity(MultimediaConstants.UNAUTHORIZED_ACCESS, HttpStatus.BAD_REQUEST);
             }
         }catch(Exception ex){
             ex.printStackTrace();
         }
-        return MultimediaUtils.getResponseEntity(MultimediaConstants.SOMTING_WENT_WRONG, HttpStatus.UNAUTHORIZED);
+        return MultimediaUtils.getResponseEntity(MultimediaConstants.SOMETHING_WENT_WRONG, HttpStatus.UNAUTHORIZED);
     }
 
 

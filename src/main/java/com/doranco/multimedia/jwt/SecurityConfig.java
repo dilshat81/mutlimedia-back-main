@@ -32,10 +32,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         auth.userDetailsService(customerUsersDetailsService);
     }
 
-   // @Bean
-    //public PasswordEncoder passwordEncoder(){
-       // return NoOpPasswordEncoder.getInstance();
-   // }
 
     @Bean(name = BeanIds.AUTHENTICATION_MANAGER)
     @Override

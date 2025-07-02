@@ -9,10 +9,12 @@ import com.doranco.multimedia.repositories.UserDao;
 import com.doranco.multimedia.service.UserService;
 import com.doranco.multimedia.utils.EmailUtils;
 import com.doranco.multimedia.utils.MultimediaUtils;
+import com.doranco.multimedia.wrapper.UserRequest;
 import com.doranco.multimedia.wrapper.UserWrapper;
 import com.google.common.base.Strings;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,6 +28,8 @@ import java.util.*;
 @Slf4j
 @Service
 public class UserServiceImpl implements UserService {
+    @Value("${user.mail}")
+    private String hostMail;
 
     @Autowired
     UserDao userDao;
@@ -44,69 +48,55 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     EmailUtils emailUtils;
-    @Override
-    public ResponseEntity<String> signUp(Map<String, String> requestMap) {
-        log.info("Inside signUp {}", requestMap);
-        try {
-            if (validateSignUpMap(requestMap)) {
-                User user = userDao.findByEmailId(requestMap.get("email"));
-                if (Objects.isNull(user)) {
-                    userDao.save(getUserFromMap(requestMap));
-                    return MultimediaUtils.getResponseEntity("Inscription réussie", HttpStatus.OK);
-                } else {
-                    return MultimediaUtils.getResponseEntity("Email existe déjà", HttpStatus.BAD_REQUEST);
-                }
 
-            } else {
-                return MultimediaUtils.getResponseEntity(MultimediaConstants.INVALID_DATA, HttpStatus.BAD_REQUEST);
-            }
-        }catch (Exception ex){
-            ex.printStackTrace();
+    @Override
+    public ResponseEntity<String> signUp(UserRequest userRequest) {
+        log.info("Inside signUp {}", userRequest);
+
+        User user = userDao.findByEmailId(userRequest.getEmail());
+        if (Objects.isNull(user)) {
+            userDao.save(getUserFromMap(userRequest));
+            return MultimediaUtils.getResponseEntity("Inscription réussie", HttpStatus.OK);
+
+        } else {
+            return MultimediaUtils.getResponseEntity("Email existe déjà", HttpStatus.BAD_REQUEST);
         }
-        return MultimediaUtils.getResponseEntity(MultimediaConstants.SOMTING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+
+
     }
 
     @Override
     public ResponseEntity<String> login(Map<String, String> requestMap) {
-       log.info("Inside login");
-       try {
-           Authentication auth = authenticationManager.authenticate(
-                   new UsernamePasswordAuthenticationToken(requestMap.get("email"), requestMap.get("password"))
-           );
+        log.info("Inside login");
+        try {
+            Authentication auth = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(requestMap.get("email"), requestMap.get("password"))
+            );
 
-           if(auth.isAuthenticated()){
-               if(customerUsersDetailsService.getUserDetail().getStatus().equalsIgnoreCase("true")){
-                   return new ResponseEntity<String>("{\"token\":\""+
-                           jwtUtil.generateToken(customerUsersDetailsService.getUserDetail().getEmail(),
-                                   customerUsersDetailsService.getUserDetail().getRole()) + "\"}",
-                           HttpStatus.OK);
-               }else{
-                   return new ResponseEntity<String>("{\"message\":\"" + "Attendez la validation de l'administrateur." + "\"}", HttpStatus.BAD_REQUEST);
-               }
-           }
+            if (auth.isAuthenticated()) {
+                if (customerUsersDetailsService.getUserDetail().getStatus().equalsIgnoreCase("true")) {
+                    return new ResponseEntity<String>("{\"token\":\"" +
+                            jwtUtil.generateToken(customerUsersDetailsService.getUserDetail().getEmail(),
+                                    customerUsersDetailsService.getUserDetail().getRole()) + "\"}",
+                            HttpStatus.OK);
+                } else {
+                    return new ResponseEntity<String>("{\"message\":\"" + "Attendez la validation de l'administrateur." + "\"}", HttpStatus.BAD_REQUEST);
+                }
+            }
 
-       }catch(Exception ex){
-           log.error("{}", ex);
-       }
+        } catch (Exception ex) {
+            log.error("{}", ex);
+        }
         return new ResponseEntity<String>("{\"message\":\"" + "Identifiants invalides." + "\"}", HttpStatus.BAD_REQUEST);
     }
 
 
-
-    private boolean validateSignUpMap(Map<String, String> requestMap){
-       if(requestMap.containsKey("name") && requestMap.containsKey("contactNumber")
-                && requestMap.containsKey("email") && requestMap.containsKey("password")){
-           return true;
-       }
-       return false;
-    }
-
-    private User getUserFromMap(Map<String, String> requestMap){
+    private User getUserFromMap(UserRequest userRequest) {
         User user = new User();
-        user.setName(requestMap.get("name"));
-        user.setContactNumber(requestMap.get("contactNumber"));
-        user.setEmail(requestMap.get("email"));
-        user.setPassword(encoder.encode(requestMap.get("password")));
+        user.setName(userRequest.getName());
+        user.setContactNumber(userRequest.getContactNumber());
+        user.setEmail(userRequest.getEmail());
+        user.setPassword(encoder.encode(userRequest.getPassword()));
         user.setStatus("false");
         user.setRole("user");
         return user;
@@ -115,13 +105,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseEntity<List<UserWrapper>> getAllUser() {
-        try{
-            if(jwtFilter.isAdmin()){
-                return new ResponseEntity<>(userDao.getAllUser(),HttpStatus.OK);
-            }else{
+        try {
+            if (jwtFilter.isAdmin()) {
+                return new ResponseEntity<>(userDao.getAllUser(), HttpStatus.OK);
+            } else {
                 return new ResponseEntity<>(new ArrayList<>(), HttpStatus.UNAUTHORIZED);
             }
-        }catch(Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
         return new ResponseEntity<List<UserWrapper>>(new ArrayList<>(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -130,37 +120,37 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<String> update(Map<String, String> requestMap) {
         try {
-            if(jwtFilter.isAdmin()){
-               Optional<User> optional= userDao.findById(Integer.parseInt(requestMap.get("id")));
-               if(!optional.isEmpty()){
+            if (jwtFilter.isAdmin()) {
+                Optional<User> optional = userDao.findById(Integer.parseInt(requestMap.get("id")));
+                if (!optional.isEmpty()) {
                     userDao.updateStatus(requestMap.get("status"), Integer.parseInt(requestMap.get("id")));
                     sendMailToAllAdmin(requestMap.get("status"), optional.get().getEmail(), userDao.getAllAdmin());
                     return MultimediaUtils.getResponseEntity("Mise à jour de l'utilisateur réussie", HttpStatus.OK);
-               }else{
-                   MultimediaUtils.getResponseEntity("l'utilisateur id n'existe pas", HttpStatus.OK);
-               }
-            }else{
-                return MultimediaUtils.getResponseEntity(MultimediaConstants.UNAUTHORIZED_ACCES, HttpStatus.UNAUTHORIZED);
+                } else {
+                    MultimediaUtils.getResponseEntity("l'utilisateur id n'existe pas", HttpStatus.OK);
+                }
+            } else {
+                return MultimediaUtils.getResponseEntity(MultimediaConstants.UNAUTHORIZED_ACCESS, HttpStatus.UNAUTHORIZED);
             }
-        }catch(Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
-        return MultimediaUtils.getResponseEntity(MultimediaConstants.SOMTING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+        return MultimediaUtils.getResponseEntity(MultimediaConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     private void sendMailToAllAdmin(String status, String user, List<String> allAdmin) {
         allAdmin.remove(jwtFilter.getCurrentUser());
-        if(status!=null && status.equalsIgnoreCase("true")){
-            emailUtils.sendSimpleMessage(jwtFilter.getCurrentUser(), "Compte validé", "User:- " +user+ "\n is approved by \nADMIN:-" + jwtFilter.getCurrentUser(), allAdmin);
-        }else{
-            emailUtils.sendSimpleMessage(jwtFilter.getCurrentUser(), "Account disabled", "User:- " +user+ "\n is disabled by \nADMIN:-" + jwtFilter.getCurrentUser(), allAdmin);
+        if (status != null && status.equalsIgnoreCase("true")) {
+            emailUtils.sendSimpleMessage(jwtFilter.getCurrentUser(), "Compte validé", "User:- " + user + "\n is approved by \nADMIN:-" + jwtFilter.getCurrentUser(), allAdmin);
+        } else {
+            emailUtils.sendSimpleMessage(jwtFilter.getCurrentUser(), "Account disabled", "User:- " + user + "\n is disabled by \nADMIN:-" + jwtFilter.getCurrentUser(), allAdmin);
         }
     }
 
     @Override
     public ResponseEntity<String> checkToken() {
-       return MultimediaUtils.getResponseEntity("true", HttpStatus.OK);
+        return MultimediaUtils.getResponseEntity("true", HttpStatus.OK);
 
     }
 
@@ -168,23 +158,23 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<String> changePassword(Map<String, String> requestMap) {
         try {
             User userObj = userDao.findByEmail(jwtFilter.getCurrentUser());
-            if(!userObj.equals(null)){
-                if(userObj.getPassword().equals(requestMap.get("oldPassword"))){
-                    userObj.setPassword(requestMap.get("newPassword"));
+            if (!userObj.equals(null)) {
+                if (encoder.matches(requestMap.get("oldPassword"), userObj.getPassword()) ){
+                     userObj.setPassword(encoder.encode(requestMap.get("newPassword")));
                     userDao.save(userObj);
-                    return MultimediaUtils.getResponseEntity("Mot de passe mis à jour avec succès", HttpStatus.OK);
-                }else{
+                    return MultimediaUtils.getResponseEntity("Mot de passe mise à jour avec succès", HttpStatus.OK);
+                } else {
                     return MultimediaUtils.getResponseEntity("Ancien mot de passe incorrect", HttpStatus.BAD_REQUEST);
                 }
 
-            }else{
-                return MultimediaUtils.getResponseEntity(MultimediaConstants.SOMTING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+            } else {
+                return MultimediaUtils.getResponseEntity(MultimediaConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
             }
-        }catch(Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
-        return MultimediaUtils.getResponseEntity(MultimediaConstants.SOMTING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+        return MultimediaUtils.getResponseEntity(MultimediaConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Override
@@ -192,15 +182,17 @@ public class UserServiceImpl implements UserService {
         try {
             User user = userDao.findByEmail(requestMap.get("email"));
             if (!Objects.isNull(user) && !Strings.isNullOrEmpty(user.getEmail()))
+                user.setPassword(encoder.encode("Dilshat917700."));
+                userDao.save(user);
+                emailUtils.forgotMail(hostMail ,"Vous pouvez change votre mot de passe", "Dilshat917700." );
                 return MultimediaUtils.getResponseEntity("Vérifiez votre courrier pour les informations d'identification", HttpStatus.OK);
 
-        }catch(Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
-        return MultimediaUtils.getResponseEntity(MultimediaConstants.SOMTING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+        return MultimediaUtils.getResponseEntity(MultimediaConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
     }
-
 
 
 }

@@ -1,19 +1,18 @@
 package com.doranco.multimedia.rest;
 
+import com.doranco.multimedia.wrapper.UserRequest;
 import com.doranco.multimedia.wrapper.UserWrapper;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
 
 @RequestMapping(path="/user")
 public interface UserRest {
     @PostMapping(path="/signup")
-    public ResponseEntity<String> signUp(@RequestBody(required = true) Map<String, String> requestMap);
+    public ResponseEntity<String> signUp(@Valid @RequestBody(required = true) UserRequest userRequest);
 
     @PostMapping(path="/login")
     public ResponseEntity<String> login(@RequestBody(required = true) Map<String, String> requestMap);
@@ -21,7 +20,7 @@ public interface UserRest {
     @GetMapping(path="/get")
     public ResponseEntity<List<UserWrapper>> getAllUser();
 
-    @PostMapping(path="/update")
+    @PatchMapping(path="/update")
     public ResponseEntity<String> update(@RequestBody(required = true) Map<String, String> requestMap);
 
     @GetMapping(path="/checkToken")

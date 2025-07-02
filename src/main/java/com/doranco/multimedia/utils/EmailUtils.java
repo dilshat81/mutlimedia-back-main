@@ -1,6 +1,7 @@
 package com.doranco.multimedia.utils;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -12,12 +13,15 @@ import java.util.List;
 
 @Service
 public class EmailUtils {
+    @Value("${user.mail}")
+    private String hostMail;
+
     @Autowired
     private JavaMailSender emailSender;
 
     public void sendSimpleMessage(String to, String subject, String text, List<String> list){
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("dilshat917@gmail.com");
+        message.setFrom(hostMail);
         message.setTo(to);
         message.setSubject(subject);
         message.setText(text);
@@ -37,10 +41,10 @@ public class EmailUtils {
     public void forgotMail(String to, String subject, String password) throws MessagingException{
         MimeMessage message = emailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
-        helper.setFrom("dilshat917@gmail.com");
+        helper.setFrom(hostMail);
         helper.setTo(to);
         helper.setSubject(subject);
-        String htmlMsg =  "<p><b>Your Login details for Cafe Management System</b><br><b>Email: </b> " + to + " <br><b>Password: </b> " + password + "<br><a href=\"http://localhost:4200/\">Click here to login</a></p>";
+        String htmlMsg =  "<p><b>Your Login details for Multimedia Management System</b><br><b>Email: </b> " + to + " <br><b>Password: </b> " + password + "<br><a href=\"http://localhost:4200/\">Click here to login</a></p>";
         message.setContent(htmlMsg, "text/html");
         emailSender.send(message);
     }

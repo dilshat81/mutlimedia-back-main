@@ -4,6 +4,7 @@ import com.doranco.multimedia.constents.MultimediaConstants;
 import com.doranco.multimedia.rest.UserRest;
 import com.doranco.multimedia.serviceImpl.UserServiceImpl;
 import com.doranco.multimedia.utils.MultimediaUtils;
+import com.doranco.multimedia.wrapper.UserRequest;
 import com.doranco.multimedia.wrapper.UserWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,13 +20,13 @@ public class UserRestImpl implements UserRest {
     @Autowired
     UserServiceImpl userService;
     @Override
-    public ResponseEntity<String> signUp(Map<String, String> requestMap) {
+    public ResponseEntity<String> signUp(UserRequest userRequest) {
         try {
-            return userService.signUp(requestMap);
+            return userService.signUp(userRequest);
         }catch (Exception ex){
             ex.printStackTrace();
         }
-       return MultimediaUtils.getResponseEntity(MultimediaConstants.SOMTING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+       return MultimediaUtils.getResponseEntity(MultimediaConstants.PASSWORD_INVALID_MESSAGE, HttpStatus.BAD_REQUEST);
     }
 
     @Override
@@ -35,7 +36,7 @@ public class UserRestImpl implements UserRest {
         }catch(Exception ex){
             ex.printStackTrace();
         }
-        return MultimediaUtils.getResponseEntity(MultimediaConstants.SOMTING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+        return MultimediaUtils.getResponseEntity(MultimediaConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Override
@@ -56,7 +57,7 @@ public class UserRestImpl implements UserRest {
             ex.printStackTrace();
         }
 
-        return MultimediaUtils.getResponseEntity(MultimediaConstants.SOMTING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+        return MultimediaUtils.getResponseEntity(MultimediaConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Override
@@ -67,7 +68,7 @@ public class UserRestImpl implements UserRest {
             ex.printStackTrace();
         }
 
-        return MultimediaUtils.getResponseEntity(MultimediaConstants.SOMTING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+        return MultimediaUtils.getResponseEntity(MultimediaConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Override
@@ -78,7 +79,7 @@ public class UserRestImpl implements UserRest {
             ex.printStackTrace();
         }
 
-        return MultimediaUtils.getResponseEntity(MultimediaConstants.SOMTING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+        return MultimediaUtils.getResponseEntity(MultimediaConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Override
@@ -89,6 +90,6 @@ public class UserRestImpl implements UserRest {
             ex.printStackTrace();
         }
 
-        return MultimediaUtils.getResponseEntity(MultimediaConstants.SOMTING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+        return MultimediaUtils.getResponseEntity(MultimediaConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
