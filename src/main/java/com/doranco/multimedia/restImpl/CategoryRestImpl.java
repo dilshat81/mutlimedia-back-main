@@ -16,8 +16,13 @@ import java.util.Map;
 
 @RestController
 public class CategoryRestImpl implements CategoryRest {
-    @Autowired
-    CategoryServiceImpl categoryService;
+
+    public CategoryRestImpl(CategoryServiceImpl categoryService) {
+        this.categoryService = categoryService;
+    }
+
+    private final CategoryServiceImpl categoryService;
+
     @Override
     public ResponseEntity<String> addNewCategory(Map<String, String> requestMap) {
         try {

@@ -181,12 +181,16 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<String> forgotPassword(Map<String, String> requestMap) {
         try {
             User user = userDao.findByEmail(requestMap.get("email"));
-            if (!Objects.isNull(user) && !Strings.isNullOrEmpty(user.getEmail()))
-                user.setPassword(encoder.encode("Dilshat917700."));
-                userDao.save(user);
-                emailUtils.forgotMail(hostMail ,"Vous pouvez change votre mot de passe", "Dilshat917700." );
-                return MultimediaUtils.getResponseEntity("Vérifiez votre courrier pour les informations d'identification", HttpStatus.OK);
+            if (!Objects.isNull(user) && !Strings.isNullOrEmpty(user.getEmail())) {
 
+                UUID uuid = UUID.randomUUID();
+                String uniquePassword = uuid.toString();
+
+                user.setPassword(encoder.encode(uniquePassword));
+                userDao.save(user);
+                emailUtils.forgotMail(hostMail, "Vous pouvez change votre mot de passe", uniquePassword);
+                return MultimediaUtils.getResponseEntity("Vérifiez votre courrier pour les informations d'identification", HttpStatus.OK);
+            }
         } catch (Exception ex) {
             ex.printStackTrace();
         }

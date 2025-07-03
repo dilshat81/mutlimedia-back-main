@@ -2,10 +2,10 @@ package com.doranco.multimedia.rest;
 
 import com.doranco.multimedia.wrapper.UserRequest;
 import com.doranco.multimedia.wrapper.UserWrapper;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
 
