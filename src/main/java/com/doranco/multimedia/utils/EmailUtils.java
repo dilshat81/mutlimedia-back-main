@@ -45,7 +45,7 @@ public class EmailUtils {
         helper.setFrom(hostMail);
         helper.setTo(to);
         helper.setSubject(subject);
-        String htmlMsg =  "<p><b>Your Login details for Multimedia Geek Galaxy store </b><br><b>Email: </b> " + to + " <br><b>Password: </b> " + password + "<br><a href=\"http://localhost:4200/\">Click here to login</a></p>";
+        String htmlMsg =  "<p><b>Vous les informations de connexion pour Multimedia Geek Galaxy store </b><br><b>Email: </b> " + to + " <br><b>Password: </b> " + password + "<br><a href=\"http://localhost:4200/\">Click here to login</a></p>";
         message.setContent(htmlMsg, "text/html");
         emailSender.send(message);
     }

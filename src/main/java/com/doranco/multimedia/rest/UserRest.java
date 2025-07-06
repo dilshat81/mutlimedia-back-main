@@ -29,8 +29,8 @@ public interface UserRest {
     @PostMapping(path="/changePassword")
     public ResponseEntity<String> changePassword(@RequestBody Map<String, String> requestMap);
 
-    @PostMapping(path="/forgotPassword")
-    public ResponseEntity<String> forgotPassword(@RequestBody Map<String, String> requestMap);
+    @PostMapping(path="/forgetPassword")
+    public ResponseEntity<String> forgetPassword(@RequestBody Map<String, String> requestMap);
 
 
 

@@ -50,7 +50,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         auth ->
                                 auth
-                                        .requestMatchers("/user/login", "/user/signup", "/user/forgotPassword").permitAll()
+                                        .requestMatchers("/user/login", "/user/signup", "/user/forgetPassword").permitAll()
                                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sessionManagement ->

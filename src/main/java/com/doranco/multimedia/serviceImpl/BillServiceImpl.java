@@ -13,15 +13,12 @@ import com.itextpdf.text.pdf.PdfWriter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.io.IOUtils;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -47,39 +44,9 @@ public class BillServiceImpl implements BillService {
                }else{
                    fileName = MultimediaUtils.getUUID();
                    requestMap.put("uuid", fileName);
-                   insertBill(requestMap);
                }
-               String data = "name: " + requestMap.get("name") + "\n" +"Contact Number:" +requestMap.get("contactNumber")
-                       + "\n"+"Email:" +requestMap.get("email") + "\n"+ "Payment method:" +requestMap.get("paymentMethod");
-               Document document = new Document();
+                insertBillWithPdf(requestMap);
 
-               PdfWriter.getInstance(document, new FileOutputStream(MultimediaConstants.STORE_LOCATION +"\\"+fileName+".pdf"));
-               document.open();
-               setRectangleInPdf(document);
-
-                Paragraph chunk = new Paragraph("Magasin Multimédia Geek Galaxy store", getFont("Header"));
-                chunk.setAlignment(Element.ALIGN_CENTER);
-                document.add(chunk);
-
-                Paragraph paragraph = new Paragraph(data+ "\n\n", getFont("data"));
-                document.add(paragraph);
-
-                PdfPTable table = new PdfPTable(5);
-                table.setWidthPercentage(100);
-                addTableHeader(table);
-
-                JSONArray jsonArray = MultimediaUtils.getJsonArrayFromString((String) requestMap.get("productDetails"));
-                for(int i=0; i<jsonArray.length(); i++){
-                    addRows(table, MultimediaUtils.getMapFromJson(jsonArray.getString(i)));
-                }
-
-                document.add(table);
-
-                Paragraph footer = new Paragraph("Total: " +requestMap.get("totalAmount")+ "\n"
-                + "Merci pour votre visite.À bientôt! ", getFont("data"));
-
-                document.add(footer);
-                document.close();
                 return  new ResponseEntity<>("{\"uuid\":\""+fileName+"\"}",HttpStatus.OK );
 
             }
@@ -92,8 +59,64 @@ public class BillServiceImpl implements BillService {
         }
         return MultimediaUtils.getResponseEntity(MultimediaConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+    private void insertBillWithPdf(Map<String, Object> requestMap)  throws DocumentException, JSONException {
+        Bill bill = createBill(requestMap);
+        ByteArrayOutputStream pdfOutputStream = new ByteArrayOutputStream();
+        Document document = new Document();
+        PdfWriter.getInstance(document, pdfOutputStream);
+        document.open();
+        setRectangleInPdf(document);
+
+        String data = "name: " + requestMap.get("name") + "\n" +"Contact Number:" +requestMap.get("contactNumber")
+                + "\n"+"Email:" +requestMap.get("email") + "\n"+ "Payment method:" +requestMap.get("paymentMethod");
+
+       // PdfWriter.getInstance(document, new FileOutputStream(MultimediaConstants.STORE_LOCATION +"\\"+fileName+".pdf"));
+
+
+        Paragraph chunk = new Paragraph("Magasin Multimédia Geek Galaxy store", getFont("Header"));
+        chunk.setAlignment(Element.ALIGN_CENTER);
+        document.add(chunk);
+
+        Paragraph paragraph = new Paragraph(data+ "\n\n", getFont("data"));
+        document.add(paragraph);
+
+        PdfPTable table = new PdfPTable(5);
+        table.setWidthPercentage(100);
+        addTableHeader(table);
+
+        JSONArray jsonArray = MultimediaUtils.getJsonArrayFromString((String) requestMap.get("productDetails"));
+        for(int i=0; i<jsonArray.length(); i++){
+            addRows(table, MultimediaUtils.getMapFromJson(jsonArray.getString(i)));
+        }
+
+        document.add(table);
+
+        Paragraph footer = new Paragraph("Total: " +requestMap.get("totalAmount")+ "\n"
+                + "Merci pour votre visite.À bientôt! ", getFont("data"));
+
+        document.add(footer);
+        document.close();
+        bill.setPdfData(pdfOutputStream.toByteArray());
+        billDao.save(bill);
+    }
+
+    private Bill createBill(Map<String, Object> requestMap) {
+
+        Bill bill= new Bill();
+        bill.setUuid((String) requestMap.get("uuid"));
+        bill.setName((String) requestMap.get("name"));
+        bill.setEmail((String) requestMap.get("email"));
+        bill.setContactNumber((String) requestMap.get("contactNumber"));
+        bill.setPaymentMethode((String) requestMap.get("paymentMethod"));
+        bill.setTotal(Integer.parseInt((String) requestMap.get("totalAmount")));
+        bill.setProductDetail((String) requestMap.get("productDetails"));
+        bill.setCreatedBy(jwtFilter.getCurrentUser());
+
+        return bill;
+    }
 
     private void addRows(PdfPTable table, Map<String, Object> data) {
+
         log.info("Inside addRows");
         table.addCell((String) data.get("name"));
         table.addCell((String) data.get("category"));
@@ -103,6 +126,7 @@ public class BillServiceImpl implements BillService {
     }
 
     private void addTableHeader(PdfPTable table) {
+
         log.info("Inside addTableHeader");
         Stream.of("Name", "Category", "Quantity", "Price", "Sub Total")
                 .forEach(columnTitre -> {
@@ -119,6 +143,7 @@ public class BillServiceImpl implements BillService {
     }
 
     private void setRectangleInPdf(Document document) throws DocumentException {
+
         log.info("Inside setRectangleInPdf");
         Rectangle rectangle = new Rectangle(577, 825,18,15);
         rectangle.enableBorderSide(1);
@@ -148,26 +173,11 @@ public class BillServiceImpl implements BillService {
         }
     }
 
-    private void insertBill(Map<String, Object> requestMap) {
-        try {
-          Bill bill = new Bill();
-          bill.setUuid((String) requestMap.get("uuid") );
-          bill.setName((String) requestMap.get("name") );
-          bill.setEmail((String) requestMap.get("email") );
-          bill.setContactNumber((String) requestMap.get("contactNumber") );
-          bill.setPaymentMethode((String) requestMap.get("paymentMethod") );
-          bill.setTotal(Integer.parseInt((String) requestMap.get("totalAmount")) );
-          bill.setProductDetail((String) requestMap.get("productDetails"));
-          bill.setCreatedBy(jwtFilter.getCurrentUser());
-          billDao.save(bill);
 
-        }catch(Exception ex){
-            ex.printStackTrace();
-        }
-    }
 
     private boolean validateRequestMap(Map<String, Object> requestMap) {
-        return requestMap.containsKey("name") &&
+
+                return requestMap.containsKey("name") &&
                 requestMap.containsKey("contactNumber") &&
                 requestMap.containsKey("email") &&
                 requestMap.containsKey("paymentMethod") &&
@@ -181,9 +191,9 @@ public class BillServiceImpl implements BillService {
         List<Bill> list = new ArrayList<>();
 
             if(jwtFilter.isAdmin()){
-                list = billDao.getAllBills();
+                list = billDao.findAll();
             }else{
-                list = billDao.getAllBillByUserName(jwtFilter.getCurrentUser());
+                list = billDao.findAllByCreatedBy(jwtFilter.getCurrentUser());
             }
 
 
@@ -195,19 +205,24 @@ public class BillServiceImpl implements BillService {
         log.info("inside getPdf : requestMap {}", requestMap);
         try {
             byte[] byteArray = new byte[0];
-            if(!requestMap.containsKey("uuid") && validateRequestMap(requestMap))
+            if(!requestMap.containsKey("uuid") && validateRequestMap(requestMap)) {
                 return new ResponseEntity<>(byteArray, HttpStatus.BAD_REQUEST);
-            String filePath = MultimediaConstants.STORE_LOCATION+"\\"+(String) requestMap.get("uuid")+".pdf";
-            if(MultimediaUtils.isFileExist((filePath))){
-                byteArray = getByteArray(filePath);
-                return new ResponseEntity<>(byteArray, HttpStatus.OK);
-            }else{
+            }
+
+            Optional<Bill> getBillByUuid = billDao.findByUuid((String) requestMap.get("uuid"));
+            if (getBillByUuid.isPresent()) {
+                return buildPdfResponse(getBillByUuid.get());
+            } else {
+                log.info("Bill not found,  generating report");
                 requestMap.put("isGenerate", false);
                 generateReport(requestMap);
-                byteArray = getByteArray(filePath);
-                return new ResponseEntity<>(byteArray, HttpStatus.OK);
-
+                getBillByUuid = billDao.findByUuid((String) requestMap.get("uuid"));
+                if (getBillByUuid.isPresent()) {
+                    return buildPdfResponse(getBillByUuid.get());
+                }
             }
+
+
 
         }catch(Exception ex){
             ex.printStackTrace();
@@ -215,21 +230,23 @@ public class BillServiceImpl implements BillService {
         return null;
     }
 
-
-
-
-    private byte[] getByteArray(String filePath) throws Exception{
-        File initialFile = new File(filePath);
-        InputStream targetStream = new FileInputStream(initialFile);
-        byte[] byteArray = IOUtils.toByteArray(targetStream);
-        targetStream.close();
-
-        return byteArray;
+    private ResponseEntity<byte[]> buildPdfResponse(Bill bill) {
+        byte[] pdfBytes = bill.getPdfData();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDisposition(ContentDisposition.builder("inline")
+                .filename(bill.getName() + ".pdf")
+                .build());
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(pdfBytes);
     }
 
 
-    @Override
-    public ResponseEntity<String> deleteBill(Integer id) {
+
+
+   @Override
+    public ResponseEntity<String> deleteBill(String id) {
         try {
             Optional optional = billDao.findById(id);
             if(!optional.isEmpty()) {
