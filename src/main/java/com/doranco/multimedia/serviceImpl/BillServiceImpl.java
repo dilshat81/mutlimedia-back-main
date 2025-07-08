@@ -19,6 +19,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -68,9 +69,9 @@ public class BillServiceImpl implements BillService {
         setRectangleInPdf(document);
 
         String data = "name: " + requestMap.get("name") + "\n" +"Contact Number:" +requestMap.get("contactNumber")
-                + "\n"+"Email:" +requestMap.get("email") + "\n"+ "Payment method:" +requestMap.get("paymentMethod");
+                + "\n"+"Email:" +requestMap.get("email") + "\n"+ "Payment method:" +requestMap.get("paymentMethod")
+                + "\n" + "Created date :  " + bill.getCreatedAt().toLocalDate() + "\n\n";
 
-       // PdfWriter.getInstance(document, new FileOutputStream(MultimediaConstants.STORE_LOCATION +"\\"+fileName+".pdf"));
 
 
         Paragraph chunk = new Paragraph("Magasin Multimédia Geek Galaxy store", getFont("Header"));
@@ -110,6 +111,7 @@ public class BillServiceImpl implements BillService {
         bill.setPaymentMethode((String) requestMap.get("paymentMethod"));
         bill.setTotal(Integer.parseInt((String) requestMap.get("totalAmount")));
         bill.setProductDetail((String) requestMap.get("productDetails"));
+        bill.setCreatedAt(LocalDateTime.now());
         bill.setCreatedBy(jwtFilter.getCurrentUser());
 
         return bill;
@@ -248,8 +250,8 @@ public class BillServiceImpl implements BillService {
    @Override
     public ResponseEntity<String> deleteBill(String id) {
         try {
-            Optional optional = billDao.findById(id);
-            if(!optional.isEmpty()) {
+            Optional<Bill> optional = billDao.findById(id);
+            if(optional.isPresent()) {
                 billDao.deleteById(id);
                 return MultimediaUtils.getResponseEntity("Facture supprimée avec succès", HttpStatus.OK);
             }else {

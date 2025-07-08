@@ -9,5 +9,4 @@ public class MultimediaConstants {
 
     public static final String UNAUTHORIZED_ACCESS = "Accès non autorisé";
 
-    public static final String STORE_LOCATION = "C:\\dev\\ProjectsTest\\com.doranco.multimedia\\doc";
 }
