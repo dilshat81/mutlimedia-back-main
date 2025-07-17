@@ -20,7 +20,7 @@ public class JwtUtil {
     private String secret;
 
     Instant now = Instant.now();
-    Instant expiration = now.plusSeconds(36000); // expires in 1 hour
+    Instant expiration = now.plusSeconds(36000); // expire dans une heure
     Date expDate = Date.from(expiration);
 
     public String extractUsername(String token){

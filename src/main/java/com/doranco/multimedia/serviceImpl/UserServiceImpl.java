@@ -53,13 +53,13 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<String> signUp(UserRequest userRequest) {
         log.info("Inside signUp {}", userRequest);
 
-        User user = userDao.findByEmailId(userRequest.getEmail());
+        User user = userDao.findByEmail(userRequest.getEmail());
         if (Objects.isNull(user)) {
             userDao.save(getUserFromMap(userRequest));
             return MultimediaUtils.getResponseEntity("Inscription réussie", HttpStatus.OK);
 
         } else {
-            return MultimediaUtils.getResponseEntity("Email existe déjà", HttpStatus.BAD_REQUEST);
+            return MultimediaUtils.getResponseEntity("Email exist déjà", HttpStatus.BAD_REQUEST);
         }
 
 
