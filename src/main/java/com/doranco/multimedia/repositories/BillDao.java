@@ -1,17 +1,18 @@
 package com.doranco.multimedia.repositories;
 
 import com.doranco.multimedia.models.Bill;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
-@Repository
-public interface BillDao extends JpaRepository<Bill, Integer> {
 
-    List<Bill> getAllBills();
-    List<Bill> getAllBillByUserName(@Param("username") String username);
+public interface BillDao extends MongoRepository<Bill, String> {
+
+    Optional<Bill> findByUuid(String uuid);
+
+    List<Bill> findAllByCreatedBy(@Param("createdBy") String username);
 
 
 }

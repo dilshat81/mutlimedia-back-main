@@ -49,8 +49,8 @@ public class BillRestImpl implements BillRest {
         return null;
     }
 
-    @Override
-    public ResponseEntity<String> deleteBill(Integer id) {
+
+    public ResponseEntity<String> deleteBill(String id) {
         try {
             return billService.deleteBill(id);
         }catch(Exception ex){

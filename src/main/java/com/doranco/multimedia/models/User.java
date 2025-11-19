@@ -1,13 +1,14 @@
 package com.doranco.multimedia.models;
 
 import com.doranco.multimedia.utils.validation.ValidPassword;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
+
+
 import java.io.Serializable;
 
 @NamedQuery(name="User.findByEmailId", query = "select u from User u where u.email=:email")

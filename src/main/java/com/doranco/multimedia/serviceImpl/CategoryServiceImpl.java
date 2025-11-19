@@ -21,11 +21,15 @@ import java.util.Optional;
 @Slf4j
 @Service
 public class CategoryServiceImpl implements CategoryService {
-    @Autowired
-    CategoryDao categoryDao;
 
-    @Autowired
-    JwtFilter jwtFilter;
+    public CategoryServiceImpl(CategoryDao categoryDao, JwtFilter jwtFilter) {
+        this.categoryDao = categoryDao;
+        this.jwtFilter = jwtFilter;
+    }
+
+    private final CategoryDao categoryDao;
+    private final JwtFilter jwtFilter;
+
     @Override
     public ResponseEntity<String> addNewCategory(Map<String, String> requestMap) {
         try {
