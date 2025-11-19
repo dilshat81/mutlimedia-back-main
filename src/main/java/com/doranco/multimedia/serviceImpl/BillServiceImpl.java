@@ -108,7 +108,7 @@ public class BillServiceImpl implements BillService {
         bill.setName((String) requestMap.get("name"));
         bill.setEmail((String) requestMap.get("email"));
         bill.setContactNumber((String) requestMap.get("contactNumber"));
-        bill.setPaymentMethode((String) requestMap.get("paymentMethod"));
+        bill.setPaymentMethod((String) requestMap.get("paymentMethod"));
         bill.setTotal(Integer.parseInt((String) requestMap.get("totalAmount")));
         bill.setProductDetail((String) requestMap.get("productDetails"));
         bill.setCreatedAt(LocalDateTime.now());
@@ -199,37 +199,33 @@ public class BillServiceImpl implements BillService {
             }
 
 
-        return new ResponseEntity<>(list, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<byte[]> getPdf(Map<String, Object> requestMap) {
         log.info("inside getPdf : requestMap {}", requestMap);
         try {
-            byte[] byteArray = new byte[0];
-            if(!requestMap.containsKey("uuid") && validateRequestMap(requestMap)) {
-                return new ResponseEntity<>(byteArray, HttpStatus.BAD_REQUEST);
-            }
-
-            Optional<Bill> getBillByUuid = billDao.findByUuid((String) requestMap.get("uuid"));
-            if (getBillByUuid.isPresent()) {
-                return buildPdfResponse(getBillByUuid.get());
-            } else {
-                log.info("Bill not found,  generating report");
-                requestMap.put("isGenerate", false);
-                generateReport(requestMap);
-                getBillByUuid = billDao.findByUuid((String) requestMap.get("uuid"));
-                if (getBillByUuid.isPresent()) {
-                    return buildPdfResponse(getBillByUuid.get());
+            if (!requestMap.containsKey("uuid")) {
+                requestMap.put("isGenerate", true);
+                ResponseEntity<String> reportResponse = generateReport(requestMap);
+                if (reportResponse.getStatusCode() != HttpStatus.OK) {
+                    return new ResponseEntity<>(new byte[0], reportResponse.getStatusCode());
                 }
             }
 
+            Optional<Bill> billOpt = billDao.findByUuid((String) requestMap.get("uuid"));
 
+            if (billOpt.isPresent()) {
+                return buildPdfResponse(billOpt.get());
+            }
+            return new ResponseEntity<>(new byte[0], HttpStatus.NOT_FOUND);
 
-        }catch(Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
-        return null;
+        return new ResponseEntity<>(new byte[0], HttpStatus.INTERNAL_SERVER_ERROR);
+
     }
 
     private ResponseEntity<byte[]> buildPdfResponse(Bill bill) {

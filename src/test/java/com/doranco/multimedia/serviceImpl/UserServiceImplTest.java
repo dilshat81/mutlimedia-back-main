@@ -85,7 +85,7 @@ class UserServiceImplTest {
 
         when(userDao.findByEmail("dilshat@gmail.com")).thenReturn(new User());
         ResponseEntity<String> response = userServiceImpl.signUp(userRequest);
-        // Then
+        // When
         verify(userDao, times(1 )).findByEmail(anyString());
         verify(userDao, times(0)).save(any(User.class));
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
@@ -122,22 +122,27 @@ class UserServiceImplTest {
     @Test
     void login() {
         //Given
-        /**
-        Map<String, String> requestMap = new HashMap<>();
-        requestMap.put("email", "test@example.com");
-        requestMap.put("password", "password");
-        //When
-        when(authenticationManager.authenticate(any())).thenReturn(authentication);
-        when(authentication.isAuthenticated()).thenReturn(true);
-        //Then
-        when(customerUsersDetailsService.getUserDetail()).thenReturn(user);
-        when(user.getStatus()).thenReturn("true");
-        when(user.getEmail()).thenReturn("test@example.com");
-        when(user.getRole()).thenReturn("USER");
-         */
 
 
-    }
+           /* Map<String, String> requestMap = new HashMap<>();
+            requestMap.put("email", "test@example.com");
+            requestMap.put("password", "Test$1234");
+
+            when(authenticationManager.authenticate(any())).thenReturn(authentication);
+            when(authentication.isAuthenticated()).thenReturn(true);
+            when(customerUsersDetailsService.getUserDetail()).thenReturn(user);
+            when(user.getStatus()).thenReturn("true");
+            when(user.getEmail()).thenReturn("test@example.com");
+            when(user.getRole()).thenReturn("USER");
+
+            ResponseEntity<String> response = loginRestImpl.login(requestMap);
+
+            verify(HttpStatus.OK, response.getStatusCode());
+            verify("Login successful", response.getBody()); // adapte selon ton vrai message
+       */ }
+
+
+
 
     @Test
     void getAllUser() {

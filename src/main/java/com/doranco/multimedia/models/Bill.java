@@ -19,7 +19,7 @@ public class Bill implements Serializable {
     private String name;
     private String email;
     private String contactNumber;
-    private String paymentMethode;
+    private String paymentMethod;
     private Integer total;
     private String productDetail;
     private String createdBy;
